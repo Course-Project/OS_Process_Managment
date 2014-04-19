@@ -8,7 +8,8 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		ElevatorController controller = new ElevatorController();
-		controller.getView().showFrame();
+		controller.showView();
+		controller.start();
 	}
 
 }

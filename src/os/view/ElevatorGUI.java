@@ -4,31 +4,30 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import os.controller.ElevatorController;
 import os.model.*;
 
 public class ElevatorGUI extends JFrame {
 
 	// Member Variable
 	private static final long serialVersionUID = 1L;
+	
+	// Delegation
+	public ElevatorController delegate;
 
 	// Contractor
-	public ElevatorGUI() throws HeadlessException {
+	public ElevatorGUI(ElevatorController delegate) throws HeadlessException {
 		super();
-
-		// UI Methods
-		this.setLayout(new GridLayout(1, ElevatorConst.totalElevator));
 		
-		this.configureMenuBar();
-		this.configureFloorButtonsPanel();
-		
-		this.configureJFrame();
+		// Set delegate
+		this.delegate = delegate;
 	}
 
 	// Private Methods for UI
 	// Configure JFrame
 	private void configureJFrame() {
 		this.setTitle("Elevator Simulator");// Set title
-		this.setSize(800, 494);// Set size of window
+		this.setSize(800, 600);// Set size of window
 		this.setResizable(false);// Can't change the size
 		this.setLocationRelativeTo(null);// Set the position of the window -
 											// Screen's Center
@@ -85,24 +84,36 @@ public class ElevatorGUI extends JFrame {
 		this.setJMenuBar(menuBar);
 	}
 	
+	// Delegate Methods
+	// Configure Header Title
+//	private void configureHeaderTitle() {
+//		this.delegate.addTitle();
+//	}
+	
 	// Configure Floor Buttons Panel
 	private void configureFloorButtonsPanel() {
-		// Components
-		JPanel floorButtonsPanel = new JPanel();
-		
-		// Set FloorButtonsPanel Style
-		floorButtonsPanel.setLayout(new GridLayout(ElevatorConst.totalFloor + 1, 3));
-//		floorButtonsPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 5, 20));
-//		floorButtonsPanel.setPreferredSize(new Dimension(0, 100));
-		floorButtonsPanel.setBackground(Color.green);
-		
-		
-		// Add to JFrame
-		this.add(floorButtonsPanel);
+		this.delegate.addFloorButtons();
+	}
+	
+	// Configure Elevator Buttons Panel
+	private void configureElevatorButtonsPanel() {
+		this.delegate.addElevator();		
 	}
 	
 	// Show View
 	public void showFrame() {
+		// UI Methods
+		this.setLayout(new GridLayout(1, ElevatorConst.TOTAL_ELEVATOR + 1));
+		
+		this.configureMenuBar();
+		
+		// Delegate Methods
+//		this.configureHeaderTitle();
+		this.configureFloorButtonsPanel();
+		this.configureElevatorButtonsPanel();
+		
+		this.configureJFrame();
+		
 		this.setVisible(true);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
