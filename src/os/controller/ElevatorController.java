@@ -48,12 +48,12 @@ public class ElevatorController extends Thread {
 	}
 	
 	// Delegate Methods
-	public void addTitle() {
-		this.view.add(new JLabel());
-		for (int i = 0; i < ElevatorConst.TOTAL_ELEVATOR; i++) {
-			this.view.add(new JLabel(String.valueOf(i) + "号电梯", SwingConstants.CENTER));
-		}
-	}
+//	public void addTitle() {
+//		this.view.add(new JLabel());
+//		for (int i = 0; i < ElevatorConst.TOTAL_ELEVATOR; i++) {
+//			this.view.add(new JLabel(String.valueOf(i) + "号电梯", SwingConstants.CENTER));
+//		}
+//	}
 	
 	public void addFloorButtons() {
 		// Components
@@ -121,8 +121,7 @@ public class ElevatorController extends Thread {
 			for (int i = 0; i < this.upStatus.length - 1; i++) {
 				if (this.upStatus[i]) {
 					// 找一个合适的电梯
-					this.elevators[this.findProperElevator(ElevatorConst.STATUS_UP, i)].addTargetFloor(i);
-					this.upStatus[i] = false;
+					this.findProperUpElevator(i);
 				}
 			}
 			
@@ -130,27 +129,73 @@ public class ElevatorController extends Thread {
 			for (int i = 1; i < this.downStatus.length; i++) {
 				if (this.downStatus[i]) {
 					// 找一个合适的电梯
-					this.elevators[this.findProperElevator(ElevatorConst.STATUS_DOWN, i)].addTargetFloor(i);
-					this.downStatus[i] = false;
+					this.findProperDownElevator(i);
 				}
 			}
 		}
 	}
 	
-	private int findProperElevator(int s, int floorNum) {
-		int result = -1;
-		int time = 100;
+//	private int findProperElevator(int s, int floorNum) {
+//		int result = -1;
+//		int time = 100;
+//		for (int i = 0; i < this.elevators.length; i++) {
+//			int t = this.elevators[i].computeTimeToFloor(floorNum);
+//			if (time >= t) {
+//				time = t;
+//				result = i;
+//			}
+//		}
+//		return result;
+//	}
+	
+	private void findProperUpElevator(int floorNum) {
+		int distance = 40;
+		int index = -1;
 		for (int i = 0; i < this.elevators.length; i++) {
-			int t = this.elevators[i].computeTimeToFloor(floorNum);
-			if (time >= t) {
-				time = t;
-				result = i;
+			int currentFloor = this.elevators[i].getCurrentFloor();
+			if (this.elevators[i].getDirection() == ElevatorConst.STATUS_UP && currentFloor <= floorNum) {
+				if (distance > (floorNum - currentFloor)) {
+					distance = floorNum - currentFloor;
+					index = i;
+				}
+			} else if (this.elevators[i].getDirection() == ElevatorConst.STATUS_IDEL) {
+				if (distance > Math.abs(floorNum - currentFloor)) {
+					distance = Math.abs(floorNum - currentFloor);
+					index = i;
+				}
 			}
 		}
-		return result;
+		if (index != -1) {
+			this.elevators[index].addTargetFloor(floorNum);
+			this.upStatus[floorNum] = false;
+			this.upButtons[floorNum].setEnabled(true);
+		}
 	}
 	
-	// Action Listener
+	private void findProperDownElevator(int floorNum) {
+		int distance = 40;
+		int index = -1;
+		for (int i = 0; i < this.elevators.length; i++) {
+			int currentFloor = this.elevators[i].getCurrentFloor();
+			if (this.elevators[i].getDirection() == ElevatorConst.STATUS_DOWN && currentFloor >= floorNum) {
+				if (distance > (currentFloor - floorNum)) {
+					distance = floorNum - currentFloor;
+					index = i;
+				}
+			} else if (this.elevators[i].getDirection() == ElevatorConst.STATUS_IDEL) {
+				if (distance > Math.abs(floorNum - currentFloor)) {
+					distance = Math.abs(floorNum - currentFloor);
+					index = i;
+				}
+			}
+		}
+		if (index != -1) {
+			this.elevators[index].addTargetFloor(floorNum);
+			this.downStatus[floorNum] = false;
+			this.downButtons[floorNum].setEnabled(true);
+		}
+	}
+	
 	// Action Listener
 	class UpButtonAction extends MouseAdapter implements MouseListener {
 		
@@ -165,7 +210,7 @@ public class ElevatorController extends Thread {
 		
 	}
 	
-	
+	// Action Listener
 	class DownButtonAction extends MouseAdapter implements MouseListener {
 		
 		@Override
@@ -173,6 +218,7 @@ public class ElevatorController extends Thread {
 			for (int i = 0; i < downButtons.length; i++) {
 				if (e.getSource() == downButtons[i]) {
 					downStatus[i] = true;
+					downButtons[i].setEnabled(false);
 				}
 			}
 		}

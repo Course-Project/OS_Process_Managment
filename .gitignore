@@ -3,3 +3,9 @@
 
 *.war
 *.ear
+
+*.doc
+*.docx
+*.png
+*.graffle
+*.pdf
